@@ -1,0 +1,20 @@
+ESP32 IOT平台
+https://blog.csdn.net/maker_knz/article/details/105912340
+
+
+阿里云;
+ProductSecret
+FNCSAGXVbwdR6kuQ
+
+ProductKey
+gowkbf7kwnu
+
+iot 程序
+https://blog.csdn.net/yannanxiu/article/details/81334230
+
+micropython IOT
+https://github.com/peterhinch/micropython-iot
+
+32对接阿里云
+https://blog.csdn.net/qq_43685040/article/details/107144496
+
