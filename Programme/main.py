@@ -104,7 +104,7 @@ def speed_calculate(diff):
         return diff/100
 
 ###舵机控制部分
-global angle1,angle2
+
 angle1 = 90  #舵机1初始位置
 angle2 = 90  #舵机2初始位置
 
@@ -183,6 +183,7 @@ def main_control():
     servo_control(servo2,speed2)
 
 def main_display0():
+    global angle1,angle2
     line1 = str("Sun auto follower")
     line2 = str(angle1+"°"+" "+angle2+"°")
     line3 = str("V1"+str(read_voltage_sun())+"V"+" I1"+str(read_current_sun())+"A")
