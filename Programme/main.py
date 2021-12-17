@@ -17,7 +17,7 @@
 
 import machine
 import time
-import ssd1306
+#import ssd1306
 
 # import network
 # from umqtt import simple as mqtt
@@ -88,8 +88,8 @@ light_sensor3=machine.ADC(machine.Pin(14))
 light_sensor4=machine.ADC(machine.Pin(27))
 
 #把12设置为上下,34设置为左右
-analog_diff_up_and_down=light_sensor1-light_sensor2
-analog_diff_left_and_right=light_sensor3-light_sensor4
+analog_diff_up_and_down=light_sensor1.read()-light_sensor2.read()
+analog_diff_left_and_right=light_sensor3.read()-light_sensor4.read()
 
 #这里写一个速度控制吧,电压不管了
 def speed_calculate(diff):
@@ -103,8 +103,8 @@ global angle1,angle2
 angle1 = 90  #舵机1初始位置
 angle2 = 90  #舵机2初始位置
 
-servo1 = machine.DAC(machine.Pin(15))
-servo2 = machine.DAC(machine.Pin(2))
+servo1=machine.PWM(machine.Pin(15),freq=50)
+servo2=machine.PWM(machine.Pin(2),freq=50)
 
 def angle_to_pwm(angle):
     return int(angle*10/180+1500)
@@ -183,6 +183,7 @@ def main_display0():
     line3 = str("V1"+str(read_voltage_sun())+"V"+" I1"+str(read_current_sun())+"A")
     line4 = str("V2"+str(read_voltage_stable())+"V"+" I2"+str(read_current_stable())+"A")
     display_oled(line1,line2,line3,line4)
+
 
 
 def main_loop():
