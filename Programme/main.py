@@ -135,17 +135,17 @@ def servo_control(servo,speed):
         servo_move_to(angle2,servo)
 
 
-###接下来是oled屏幕显示
-oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17))
-oled_display = ssd1306.SSD1306_I2C(128, 64, oled_pins)
-print("oled init ok")
-def display_oled(text1,text2,text3,text4):
-    oled_display.fill(0)
-    oled_display.text(text1, 0, 0)
-    oled_display.text(text2, 0, 10)
-    oled_display.text(text3, 0, 20)
-    oled_display.text(text4, 0, 30)
-    oled_display.show()
+# ###接下来是oled屏幕显示
+# oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17))
+# oled_display = ssd1306.SSD1306_I2C(128, 64, oled_pins)
+# print("oled init ok")
+# def display_oled(text1,text2,text3,text4):
+#     oled_display.fill(0)
+#     oled_display.text(text1, 0, 0)
+#     oled_display.text(text2, 0, 10)
+#     oled_display.text(text3, 0, 20)
+#     oled_display.text(text4, 0, 30)
+#     oled_display.show()
 
 #oled_display.invert(True)  #反色显示
 
@@ -160,16 +160,16 @@ def voltage_transfer(voltage):
     return voltage/1024*3.3
 
 def read_voltage_sun():
-    return voltage_transfer(sun_voltage)
+    return voltage_transfer(sun_voltage.read())
     
 def read_current_sun():
-    return voltage_transfer(sun_current)*1000/185  #单位换算: 185mv/A
+    return voltage_transfer(sun_current.read())*1000/185  #单位换算: 185mv/A
 
 def read_voltage_stable():
-    return voltage_transfer(stable_voltage)
+    return voltage_transfer(stable_voltag.read())
 
 def read_current_stable():
-    return voltage_transfer(stable_current)*1000/185  #单位换算: 185mv/A
+    return voltage_transfer(stable_current.read())*1000/185  #单位换算: 185mv/A
 
 
 ###主程序?
@@ -183,21 +183,21 @@ def main_control():
     servo_control(servo1,speed1)
     servo_control(servo2,speed2)
 
-def main_display0():
-    print("running display0")
-    global angle1,angle2
-    line1 = str("Sun auto follower")
-    line2 = str(angle1+"°"+" "+angle2+"°")
-    line3 = str("V1"+str(read_voltage_sun())+"V"+" I1"+str(read_current_sun())+"A")
-    line4 = str("V2"+str(read_voltage_stable())+"V"+" I2"+str(read_current_stable())+"A")
-    display_oled(line1,line2,line3,line4)
+# def main_display0():
+#     print("running display0")
+#     global angle1,angle2
+#     line1 = str("Sun auto follower")
+#     line2 = str(angle1+"°"+" "+angle2+"°")
+#     line3 = str("V1"+str(read_voltage_sun())+"V"+" I1"+str(read_current_sun())+"A")
+#     line4 = str("V2"+str(read_voltage_stable())+"V"+" I2"+str(read_current_stable())+"A")
+#     display_oled(line1,line2,line3,line4)
 
 
 
 def main_loop():
     while True:
         main_control()
-        main_display0()
+        #main_display0()
         time.sleep(0.1)
 
 main_loop()
