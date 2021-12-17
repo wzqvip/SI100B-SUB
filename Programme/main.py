@@ -87,9 +87,14 @@ light_sensor2=machine.ADC(machine.Pin(12))
 light_sensor3=machine.ADC(machine.Pin(14))
 light_sensor4=machine.ADC(machine.Pin(27))
 
+sensor1_voltage= light_sensor1.read()
+sensor2_voltage= light_sensor2.read()
+sensor3_voltage= light_sensor3.read()
+sensor4_voltage= light_sensor4.read()
+
 #把12设置为上下,34设置为左右
-analog_diff_up_and_down=light_sensor1.read()-light_sensor2.read()
-analog_diff_left_and_right=light_sensor3.read()-light_sensor4.read()
+analog_diff_up_and_down=sensor1_voltage-sensor2_voltage
+analog_diff_left_and_right=sensor3_voltage-sensor4_voltage
 
 #这里写一个速度控制吧,电压不管了
 def speed_calculate(diff):
