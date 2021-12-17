@@ -23,7 +23,7 @@ import time
 # from umqtt import simple as mqtt
 # import _thread
 # import ujson
-
+print("import ok")
 
 
 # ###阿里云IOT平台接入
@@ -91,7 +91,7 @@ sensor1_voltage= light_sensor1.read()
 sensor2_voltage= light_sensor2.read()
 sensor3_voltage= light_sensor3.read()
 sensor4_voltage= light_sensor4.read()
-
+print("read ok")
 #把12设置为上下,34设置为左右
 analog_diff_up_and_down=sensor1_voltage-sensor2_voltage
 analog_diff_left_and_right=sensor3_voltage-sensor4_voltage
@@ -104,13 +104,13 @@ def speed_calculate(diff):
         return diff/100
 
 ###舵机控制部分
-
+global angle1,angle2
 angle1 = 90  #舵机1初始位置
 angle2 = 90  #舵机2初始位置
 
 servo1=machine.PWM(machine.Pin(15),freq=50)
 servo2=machine.PWM(machine.Pin(2),freq=50)
-
+print("servo init ok")
 def angle_to_pwm(angle):
     return int(angle*10/180+1500)
 
@@ -138,7 +138,7 @@ def servo_control(servo,speed):
 ###接下来是oled屏幕显示
 oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17))
 oled_display = ssd1306.SSD1306_I2C(128, 64, oled_pins)
-
+print("oled init ok")
 def display_oled(text1,text2,text3,text4):
     oled_display.fill(0)
     oled_display.text(text1, 0, 0)
@@ -155,7 +155,7 @@ sun_voltage=machine.ADC(machine.Pin(25))
 sun_current=machine.ADC(machine.Pin(26))
 stable_voltage=machine.ADC(machine.Pin(33))
 stable_current=machine.ADC(machine.Pin(32))
-
+print("adc init ok")
 def voltage_transfer(voltage):
     return voltage/1024*3.3
 
@@ -174,6 +174,7 @@ def read_current_stable():
 
 ###主程序?
 def main_control():
+    print("running main")
     #首先确认旋转方向
     global angle1,angle2
     speed1=speed_calculate(analog_diff_left_and_right)
@@ -183,6 +184,7 @@ def main_control():
     servo_control(servo2,speed2)
 
 def main_display0():
+    print("running display0")
     global angle1,angle2
     line1 = str("Sun auto follower")
     line2 = str(angle1+"°"+" "+angle2+"°")
