@@ -17,60 +17,62 @@
 
 import machine
 import time
-import network
-from umqtt import simple as mqtt
-import _thread
-import ujson
 import ssd1306
 
+# import network
+# from umqtt import simple as mqtt
+# import _thread
+# import ujson
 
-###阿里云IOT平台接入
 
-ALINK_PROP_SET_METHOD='thing.service.property.set'  #阿里云的东西
 
-def threadPublish():    #发布信息
-    while True:
-        time.sleep(2)
-        # d.measure()
-        # print(d.humidity())
-        # print(d.temperature())
-        # send_mseg={"params":{"Temperature":d.temperature(),"Humidity":d.humidity()},"method":"thing.service.property.set"}
-        client.publish(topic=" ",msg=str(send_mseg),qos=1,retain=False)
+# ###阿里云IOT平台接入
 
-def receiveMessage():   #接收信息
-    while True:
-        client.wait_msg()
-#接收信息。接收到的信息是json格式，要进行解析。
-def recvMessage(topic,msg):   #接收信息
-    # parsed=ujson.loads(msg)
-    # str=parsed["params"]
-    # print(str)
-    # print(type(parsed["params"]))
-    # print(str.get("PowerSwitch"))
-    # global state        
-    # state=str.get("PowerSwitch")
-    # if state == 1:
-    #     led.value(1)
-    #     print("led on!") 
-    # if state == 0:
-    #     led.value(0)
-    #     print("led off!")
+# ALINK_PROP_SET_METHOD='thing.service.property.set'  #阿里云的东西
 
-wlan=network.WLAN(network.STA_IF)  
-wlan.active(True)
-wlan.connect('HUAWEI Mate 40 Pro+','20020926')#连接WIFI
-ProductKey='gowkbf7kwnu'
-DeviceName='FNCSAGXVbwdR6kuQ'
-DeviceSecret='信导期末项目'
-CLIENT_ID='esp32'
-user_name='wzqvip'#用户名
-user_password='20020926Wang'#用户密码
-SERVER= "https://iot.console.aliyun.com/product/productDetail/gowkbf7kwnu"#阿里云物联网平台地址
-PORT=1883
-client = mqtt.MQTTClient(client_id=CLIENT_ID, server=SERVER, port=PORT, user=user_name, password=user_password, keepalive=60)
-client.connect()
-client.set_callback(recvMessage)#设置回调函数
-client.subscribe(" ")#订阅主题
+# def threadPublish():    #发布信息
+#     while True:
+#         time.sleep(2)
+#         # d.measure()
+#         # print(d.humidity())
+#         # print(d.temperature())
+#         # send_mseg={"params":{"Temperature":d.temperature(),"Humidity":d.humidity()},"method":"thing.service.property.set"}
+#         client.publish(topic=" ",msg=str(send_mseg),qos=1,retain=False)
+
+# def receiveMessage():   #接收信息
+#     while True:
+#         client.wait_msg()
+# #接收信息。接收到的信息是json格式，要进行解析。
+# def recvMessage(topic,msg):   #接收信息
+#     # parsed=ujson.loads(msg)
+#     # str=parsed["params"]
+#     # print(str)
+#     # print(type(parsed["params"]))
+#     # print(str.get("PowerSwitch"))
+#     # global state        
+#     # state=str.get("PowerSwitch")
+#     # if state == 1:
+#     #     led.value(1)
+#     #     print("led on!") 
+#     # if state == 0:
+#     #     led.value(0)
+#     #     print("led off!")
+
+# wlan=network.WLAN(network.STA_IF)  
+# wlan.active(True)
+# wlan.connect('HUAWEI Mate 40 Pro+','20020926')#连接WIFI
+# ProductKey='gowkbf7kwnu'
+# DeviceName='FNCSAGXVbwdR6kuQ'
+# DeviceSecret='信导期末项目'
+# CLIENT_ID='esp32'
+# user_name='wzqvip'#用户名
+# user_password='20020926Wang'#用户密码
+# SERVER= "https://iot.console.aliyun.com/product/productDetail/gowkbf7kwnu"#阿里云物联网平台地址
+# PORT=1883
+# client = mqtt.MQTTClient(client_id=CLIENT_ID, server=SERVER, port=PORT, user=user_name, password=user_password, keepalive=60)
+# client.connect()
+# client.set_callback(recvMessage)#设置回调函数
+# client.subscribe(" ")#订阅主题
 
 
 ###主程序部分
@@ -181,11 +183,6 @@ def main_display0():
     line3 = str("V1"+str(read_voltage_sun())+"V"+" I1"+str(read_current_sun())+"A")
     line4 = str("V2"+str(read_voltage_stable())+"V"+" I2"+str(read_current_stable())+"A")
     display_oled(line1,line2,line3,line4)
-
-# def main_display1():
-#     line1="Sun auto follower"
-#     line2=
-
 
 
 def main_loop():
