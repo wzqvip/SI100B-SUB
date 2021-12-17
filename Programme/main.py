@@ -136,7 +136,7 @@ def servo_control(servo,speed):
 
 
 # ###接下来是oled屏幕显示
-# oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17))
+# oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17), freq=400000)
 # oled_display = ssd1306.SSD1306_I2C(128, 64, oled_pins)
 # print("oled init ok")
 # def display_oled(text1,text2,text3,text4):
