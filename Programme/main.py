@@ -92,20 +92,8 @@ analog_diff_left_and_right=light_sensor3-light_sensor4
 def speed_calculate(diff):
     if -100<diff<100:
         return 0
-    elif 100<diff<500:
-        return 1
-    elif 500<diff<1000:
-        return 2
-    elif 1000<diff:
-        return 3
-    elif diff<-1000:
-        return -3
-    elif -1000<diff<-500:
-        return -2
-    elif -500<diff<-100:
-        return -1
-    else:
-        print("out of control")
+    else :
+        return diff/100
 
 ###舵机控制部分
 angle1 = 90  #舵机1初始位置
@@ -121,21 +109,14 @@ def servo_move_to(angle,servo):
     servo.write(angle_to_pwm(angle))
 
 def servo_control(servo,speed):
-    if speed == 0:
-        pass
-    elif speed==1:
-        servo.write(angle_to_pwm(angle1+1))
-    elif speed==-1:
-        servo.write(angle_to_pwm(angle1-1))
-    elif speed==2:
-        servo.write(angle_to_pwm(angle1+2))
-    elif speed==-2:
-        servo.write(angle_to_pwm(angle1-2))
-    elif speed==3:
-        servo.write(angle_to_pwm(angle1+3))
-    elif speed==-3:
-        servo.write(angle_to_pwm(angle1-3))
+    global angle1,angle2
+    if servo == 1:
+        servo_move_to(angle1+speed,servo1)
+        angle1 = angle1+speed
+    if servo == 2:
+        servo_move_to(angle2+speed,servo2)
+        angle2 = angle2+speed
     else:
-        print("out of control")
+        print("No motor")
 
-        
+###接下来是oled屏幕显示
