@@ -1,0 +1,51 @@
+class SSD1306:
+    #翻转颜色
+    def invert(self, invert):
+        self.write_cmd(SET_NORM_INV | (invert & 1))
+    #填充画面 0为空 1为亮
+    def fill(self, col):
+        self.framebuf.fill(col)
+    #填充一个像素在X,YE    
+    def pixel(self, x, y, col):
+        self.framebuf.pixel(x, y, col)
+    #滚动
+    def scroll(self, dx, dy):
+        self.framebuf.scroll(dx, dy)
+    #文本
+    def text(self, string, x, y, col=1):
+        self.framebuf.text(string, x, y, col)
+    #线
+    def hline(self, x, y, w, col=1)
+        self.framebuf.hline(x, y, w, col)
+    #显示函数很重要！！  每次执行相应显示功能都需要加上show(),fill(x)除外
+    def show(self):
+        x0 = 0
+        x1 = self.width - 1
+        if self.width == 64:
+            # displays with width of 64 pixels are shifted by 32
+            x0 += 32
+            x1 += 32
+        self.write_cmd(SET_COL_ADDR)
+        self.write_cmd(x0)
+        self.write_cmd(x1)
+        self.write_cmd(SET_PAGE_ADDR)
+        self.write_cmd(0)
+        self.write_cmd(self.pages - 1)
+        self.write_framebuf()    
+
+
+
+from machine import I2C,Pin
+from ssd1306 import SSD1306_I2C
+i2c = I2C(scl = Pin(4),sda = Pin(5),freq = 10000) 
+oled = SSD1306_I2C(128, 64, i2c) #创建oled对象
+
+oled.rect(0,0,127,63,1)
+oled.show()
+
+oled.text("Hello World!",0,0)
+oled.show()
+
+oled.fill_rect(0, 0, 20, 20, 0)
+oled.show()
+
