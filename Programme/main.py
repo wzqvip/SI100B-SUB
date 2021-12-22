@@ -17,7 +17,7 @@
 
 import machine
 import time
-#import ssd1306
+import ssd1306
 
 # import network
 # from umqtt import simple as mqtt    #rom umqtt.simple import MQTTClient
@@ -26,7 +26,7 @@ import time
 print("import ok")
 
 
-import umqtt.simple as mqtt
+import simple as mqtt
 import network
 import socket
 import _thread
@@ -135,17 +135,16 @@ def servo_control(servo,speed):
         servo_move_to(angle2,servo)
 
 
-# ###接下来是oled屏幕显示
-# oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17), freq=100000)
-# oled_display = ssd1306.SSD1306_I2C(128, 64, oled_pins)
-# print("oled init ok")
-# def display_oled(text1,text2,text3,text4):
-#     oled_display.fill(0)
-#     oled_display.text(text1, 0, 0)
-#     oled_display.text(text2, 0, 10)
-#     oled_display.text(text3, 0, 20)
-#     oled_display.text(text4, 0, 30)
-#     oled_display.show()
+###接下来是oled屏幕显示
+oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17), freq=100000)
+oled_display = ssd1306.SSD1306_I2C(128, 64, oled_pins)
+print("oled init ok")
+def display_oled(text1,text2,text3,text4):
+    oled_display.text(text1, 0, 0)
+    oled_display.text(text2, 0, 10)
+    oled_display.text(text3, 0, 20)
+    oled_display.text(text4, 0, 30)
+    oled_display.show()
 
 #oled_display.invert(True)  #反色显示
 
