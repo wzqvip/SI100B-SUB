@@ -20,43 +20,49 @@ import time
 #import ssd1306
 
 # import network
-# from umqtt import simple as mqtt
+# from umqtt import simple as mqtt    #rom umqtt.simple import MQTTClient
 # import _thread
 # import ujson
 print("import ok")
 
 
-# ###阿里云IOT平台接入
+import umqtt.simple as mqtt
+import network
+import socket
+import _thread
+import ujson
+
+# # ###阿里云IOT平台接入
 
 # ALINK_PROP_SET_METHOD='thing.service.property.set'  #阿里云的东西
+# # client = mqtt.Client()
 
-# def threadPublish():    #发布信息
+# def thread_publish():  #这个线程发布数据
 #     while True:
 #         time.sleep(2)
-#         # d.measure()
-#         # print(d.humidity())
-#         # print(d.temperature())
-#         # send_mseg={"params":{"Temperature":d.temperature(),"Humidity":d.humidity()},"method":"thing.service.property.set"}
-#         client.publish(topic=" ",msg=str(send_mseg),qos=1,retain=False)
+#         send_power = {"method":ALINK_PROP_SET_METHOD,"params":{"Voltage":read_voltage_sun(),"Current":read_current_sun(),"Voltage_stable":read_voltage_stable(),"Current_stable":read_current_stable()}}
+#         send_servo = {"method":ALINK_PROP_SET_METHOD,"params":{"Servo_angle1":angle1,"Servo_angle2":angle2}}
+#         client.publish(topic=" ",msg=str(send_power),qos=1,retain=False)
+#         client.publish(topic=" ",msg=str(send_servo),qos=1,retain=False)
 
-# def receiveMessage():   #接收信息
+# def receivemessage():
 #     while True:
 #         client.wait_msg()
-# #接收信息。接收到的信息是json格式，要进行解析。
-# def recvMessage(topic,msg):   #接收信息
-#     # parsed=ujson.loads(msg)
-#     # str=parsed["params"]
-#     # print(str)
-#     # print(type(parsed["params"]))
-#     # print(str.get("PowerSwitch"))
-#     # global state        
-#     # state=str.get("PowerSwitch")
-#     # if state == 1:
-#     #     led.value(1)
-#     #     print("led on!") 
-#     # if state == 0:
-#     #     led.value(0)
-#     #     print("led off!")
+
+# def receive_message(topic,msg):
+#     global angle1,angle2
+#     print(topic,msg)
+#     parsed_msg = ujson.loads(msg)
+#     string = parsed_msg['params']
+#     print(string)
+#     print(string.get('Servo_angle1'))
+#     print(string.get('Servo_angle2'))
+#     angle1 = string.get('Servo_angle1')
+#     angle2 = string.get('Servo_angle2')
+#     print(angle1,angle2)
+#     servo_move_to(angle1,servo1)
+#     servo_move_to(angle2,servo2)
+
 
 # wlan=network.WLAN(network.STA_IF)  
 # wlan.active(True)
@@ -71,15 +77,9 @@ print("import ok")
 # PORT=1883
 # client = mqtt.MQTTClient(client_id=CLIENT_ID, server=SERVER, port=PORT, user=user_name, password=user_password, keepalive=60)
 # client.connect()
-# client.set_callback(recvMessage)#设置回调函数
+# client.set_callback(receivemessage)#设置回调函数
 # client.subscribe(" ")#订阅主题
 
-
-###主程序部分
-
-#先来读取电压吧   放到后面了
-# def voltage_transfer(voltage):
-#     return voltage/1024*3.3
 
 #四个光敏电阻的电压
 light_sensor1=machine.ADC(machine.Pin(13))
@@ -115,7 +115,7 @@ def angle_to_pwm(angle):
     return int(angle*10/180+1500)
 
 def servo_move_to(angle,servo):
-    servo.write(angle_to_pwm(angle))
+    servo.duty(angle_to_pwm(angle))
 
 def servo_control(servo,speed):
     global angle1,angle2
@@ -136,7 +136,7 @@ def servo_control(servo,speed):
 
 
 # ###接下来是oled屏幕显示
-# oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17), freq=400000)
+# oled_pins = machine.I2C(scl=machine.Pin(16), sda=machine.Pin(17), freq=100000)
 # oled_display = ssd1306.SSD1306_I2C(128, 64, oled_pins)
 # print("oled init ok")
 # def display_oled(text1,text2,text3,text4):
@@ -166,7 +166,7 @@ def read_current_sun():
     return voltage_transfer(sun_current.read())*1000/185  #单位换算: 185mv/A
 
 def read_voltage_stable():
-    return voltage_transfer(stable_voltag.read())
+    return voltage_transfer(stable_voltage.read())
 
 def read_current_stable():
     return voltage_transfer(stable_current.read())*1000/185  #单位换算: 185mv/A
@@ -200,4 +200,6 @@ def main_loop():
         #main_display0()
         time.sleep(0.1)
 
-main_loop()
+_thread.start_new_thread(main_loop,())
+_thread.start_new_thread(client.check_msg,())
+_thread.start_new_thread(client.send_msg,())
