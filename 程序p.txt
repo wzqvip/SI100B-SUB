@@ -1,0 +1,224 @@
+import machine
+import time
+
+# import network
+# from umqtt import simple as mqtt
+# import _thread
+# import ujson
+print("import ok")
+
+
+# ###阿里云IOT平台接入
+
+# ALINK_PROP_SET_METHOD='thing.service.property.set'
+
+# def threadPublish():    #发布信息
+#     while True:
+#         time.sleep(2)
+#         # d.measure()
+#         # print(d.humidity())
+#         # print(d.temperature())
+#         # send_mseg={"params":{"Temperature":d.temperature(),"Humidity":d.humidity()},"method":"thing.service.property.set"}
+#         client.publish(topic=" ",msg=str(send_mseg),qos=1,retain=False)
+
+# def receiveMessage():   #接收信息
+#     while True:
+#         client.wait_msg()
+# #接收信息。接收到的信息是json格式，要进行解析。
+# def recvMessage(topic,msg):   #接收信息
+#     # parsed=ujson.loads(msg)
+#     # str=parsed["params"]
+#     # print(str)
+#     # print(type(parsed["params"]))
+#     # print(str.get("PowerSwitch"))
+#     # global state        
+#     # state=str.get("PowerSwitch")
+#     # if state == 1:
+#     #     led.value(1)
+#     #     print("led on!") 
+#     # if state == 0:
+#     #     led.value(0)
+#     #     print("led off!")
+
+# wlan=network.WLAN(network.STA_IF)  
+# wlan.active(True)
+# wlan.connect('HUAWEI Mate 40 Pro+','20020926')#连接WIFI
+# ProductKey='gowkbf7kwnu'
+# DeviceName='FNCSAGXVbwdR6kuQ'
+# DeviceSecret='信导期末项目'
+# CLIENT_ID='esp32'
+# user_name='wzqvip'#用户名
+# user_password='20020926Wang'#用户密码
+# SERVER= "https://iot.console.aliyun.com/product/productDetail/gowkbf7kwnu"#阿里云物联网平台地址
+# PORT=1883
+# client = mqtt.MQTTClient(client_id=CLIENT_ID, server=SERVER, port=PORT, user=user_name, password=user_password, keepalive=60)
+# client.connect()
+# client.set_callback(recvMessage)#设置回调函数
+# client.subscribe(" ")#订阅主题
+
+
+###主程序部分
+
+#先来读取电压吧   放到后面了
+# def voltage_transfer(voltage):
+#     return voltage/1024*3.3
+
+#四个光敏电阻的电压
+light_sensor1=machine.ADC(machine.Pin(13))
+light_sensor2=machine.ADC(machine.Pin(12))
+light_sensor3=machine.ADC(machine.Pin(14))
+light_sensor4=machine.ADC(machine.Pin(27))
+
+sensor1_voltage= light_sensor1.read()
+sensor2_voltage= light_sensor2.read()
+sensor3_voltage= light_sensor3.read()
+sensor4_voltage= light_sensor4.read()
+print("read ok")
+#把12设置为上下,34设置为左右
+analog_diff_up_and_down=sensor1_voltage-sensor2_voltage
+analog_diff_left_and_right=sensor3_voltage-sensor4_voltage
+
+#这里写一个速度控制吧,电压不管了
+def speed_calculate(diff):
+    if -100<diff<100:
+        return 0
+    else :
+        return diff/100
+
+###舵机控制部分
+global angle1,angle2
+angle1 = 90  #舵机1初始位置
+angle2 = 90  #舵机2初始位置
+
+servo1=machine.PWM(machine.Pin(15),freq=50)
+servo2=machine.PWM(machine.Pin(2),freq=50)
+print("servo init ok")
+def angle_to_pwm(angle):
+    return int(angle*10/180+1500)
+
+def servo_move_to(angle,servo):
+    servo.write(angle_to_pwm(angle))
+
+def servo_control(servo,speed):
+    global angle1,angle2
+    if servo == servo1:
+        angle1 += speed
+        if angle1 > 180:  #极限复位
+            angle1 = 0
+        if angle1 < 0:
+            angle1 = 180
+        servo_move_to(angle1,servo)
+    if servo == servo2:
+        angle2 += speed
+        if angle2 > 180:   #这里没啥,防止报错用的
+            angle2 = 180
+        elif angle2 < 0:
+            angle2 = 0
+        servo_move_to(angle2,servo)
+
+
+###接下来是oled屏幕显示
+@ -0,0 +1,51 @@
+class SSD1306:
+    #翻转颜色
+    def invert(self, invert):
+        self.write_cmd(SET_NORM_INV | (invert & 1))
+    #填充画面 0为空 1为亮
+    def fill(self, col):
+        self.framebuf.fill(col)
+    #填充一个像素在X,YE    
+    def pixel(self, x, y, col):
+        self.framebuf.pixel(x, y, col)
+    #滚动
+    def scroll(self, dx, dy):
+        self.framebuf.scroll(dx, dy)
+    #文本
+    def text(self, string, x, y, col=1):
+        self.framebuf.text(string, x, y, col)
+    #线
+    def hline(self, x, y, w, col=1)
+        self.framebuf.hline(x, y, w, col)
+    #显示函数很重要！！  每次执行相应显示功能都需要加上show(),fill(x)除外
+    def show(self):
+        x0 = 0
+        x1 = self.width - 1
+        if self.width == 64:
+            # displays with width of 64 pixels are shifted by 32
+            x0 += 32
+            x1 += 32
+        self.write_cmd(SET_COL_ADDR)
+        self.write_cmd(x0)
+        self.write_cmd(x1)
+        self.write_cmd(SET_PAGE_ADDR)
+        self.write_cmd(0)
+        self.write_cmd(self.pages - 1)
+        self.write_framebuf()    
+
+
+
+from machine import I2C,Pin
+from ssd1306 import SSD1306_I2C
+i2c = I2C(scl = Pin(4),sda = Pin(5),freq = 10000) 
+oled = SSD1306_I2C(128, 64, i2c) #创建oled对象
+
+oled.rect(0,0,127,63,1)
+oled.show()
+
+oled.text("Hello World!",0,0)
+oled.show()
+
+oled.fill_rect(0, 0, 20, 20, 0)
+oled.show()
+
+@ -160,16 +160,16 @@ def voltage_transfer(voltage):
+    return voltage/1024*3.3
+
+def read_voltage_sun():
+    return voltage_transfer(sun_voltage)
+    return voltage_transfer(sun_voltage.read())
+    
+def read_current_sun():
+    return voltage_transfer(sun_current)*1000/185  #单位换算: 185mv/A
+    return voltage_transfer(sun_current.read())*1000/185  #单位换算: 185mv/A
+
+def read_voltage_stable():
+    return voltage_transfer(stable_voltage)
+    return voltage_transfer(stable_voltag.read())
+
+def read_current_stable():
+    return voltage_transfer(stable_current)*1000/185  #单位换算: 185mv/A
+    return voltage_transfer(stable_current.read())*1000/185  #单位换算: 185mv/A
+
+
+###主程序?
+@ -183,21 +183,21 @@ def main_control():
+    servo_control(servo1,speed1)
+    servo_control(servo2,speed2)
+
+def main_display0():
+    print("running display0")
+    global angle1,angle2
+    line1 = str("Sun auto follower")
+    line2 = str(angle1+"°"+" "+angle2+"°")
+    line3 = str("V1"+str(read_voltage_sun())+"V"+" I1"+str(read_current_sun())+"A")
+    line4 = str("V2"+str(read_voltage_stable())+"V"+" I2"+str(read_current_stable())+"A")
+    display_oled(line1,line2,line3,line4)
+# def main_display0():
+#     print("running display0")
+#     global angle1,angle2
+#     line1 = str("Sun auto follower")
+#     line2 = str(angle1+"°"+" "+angle2+"°")
+#     line3 = str("V1"+str(read_voltage_sun())+"V"+" I1"+str(read_current_sun())+"A")
+#     line4 = str("V2"+str(read_voltage_stable())+"V"+" I2"+str(read_current_stable())+"A")
+#     display_oled(line1,line2,line3,line4)
+
+
+
+def main_loop():
+    while True:
+        main_control()
+        main_display0()
+        #main_display0()
+        time.sleep(0.1)
+
+main_loop()
