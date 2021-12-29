@@ -23,80 +23,148 @@ import machine
 import time
 #import ssd1306
 
-from simple import MQTTClient
-import network
-from machine import Pin,Timer
 
-print("import ok")
+"""这里是发布信息"""
+# from simple import MQTTClient
+# import network
+# from machine import Pin,Timer
 
-SSID="********"
-PASSWORD="*******"
+
+# print("import ok")
+
+# SSID="********"
+# PASSWORD="*******"
  
-SERVER ='106.15.83.29'#这里使用域名一直连接不上，只能转换为IP使用了
-#PORT：端口号，库里面默认使用处理
-CLIENT_ID = "7788|securemode=3,signmethod=hmacsha1|"   #设备ID
-username='ESP32-Device1&a1R00eqY67d'
-password='0A1457C700FBEFE108B3E5E5523777BA82321363'
+# SERVER ='106.15.83.29'#这里使用域名一直连接不上，只能转换为IP使用了
+# #PORT：端口号，库里面默认使用处理
+# CLIENT_ID = "7788|securemode=3,signmethod=hmacsha1|"   #设备ID
+# username='ESP32-Device1&a1R00eqY67d'
+# password='0A1457C700FBEFE108B3E5E5523777BA82321363'
  
-publish_TOPIC = '/sys/a1R00eqY67d/ESP32-Device1/thing/event/property/post'
-subscribe_TOPIC ='/sys/a1R00eqY67d/ESP32-Device1/thing/event/property/post_reply'
+# publish_TOPIC = '/sys/a1R00eqY67d/ESP32-Device1/thing/event/property/post'
+# subscribe_TOPIC ='/sys/a1R00eqY67d/ESP32-Device1/thing/event/property/post_reply'
  
-client=None
-mydht=None
-def sub_cb(topic, msg):
-    print((topic, msg))
+# client=None
+# mydht=None
+# def sub_cb(topic, msg):
+#     print((topic, msg))
  
-def ConnectWifi(ssid,passwd):
-    global wlan
-    wlan=network.WLAN(network.STA_IF)         #create a wlan object
-    wlan.active(True)                         #Activate the network interface
-    wlan.disconnect()                         #Disconnect the last connected WiFi
-    wlan.connect(ssid,passwd)                 #connect wifi
-    while(wlan.ifconfig()[0]=='0.0.0.0'):
-        time.sleep(1)
-    print(wlan.ifconfig())
+# def ConnectWifi(ssid,passwd):
+#     global wlan
+#     wlan=network.WLAN(network.STA_IF)         #create a wlan object
+#     wlan.active(True)                         #Activate the network interface
+#     wlan.disconnect()                         #Disconnect the last connected WiFi
+#     wlan.connect(ssid,passwd)                 #connect wifi
+#     while(wlan.ifconfig()[0]=='0.0.0.0'):
+#         time.sleep(1)
+#     print(wlan.ifconfig())
  
-def apptimerevent(mytimer):
-    try:
-        sensordata=ReadTemHum()
-        mymessage='{"params": {"CurrentTemperature": %d ,"CurrentHumidity": %d }, "method": "thing.event.property.post"}'%(sensordata[0],sensordata[1])
-        client.publish(topic=publish_TOPIC,msg= mymessage, retain=False, qos=0)
-    except Exception as ex_results2:
-        print('exception',ex_results2)
-        mytimer.deinit()
-#     finally:
-#         machine.reset()
+# def apptimerevent(mytimer):
+#     try:
+#         sensordata=ReadData()
+#         mymessage='{"params": {"CurrentTemperature": %d ,"CurrentHumidity": %d }, "method": "thing.event.property.post"}'%(sensordata[0],sensordata[1])
+#         client.publish(topic=publish_TOPIC,msg= mymessage, retain=False, qos=0)
+#     except Exception as ex_results2:
+#         print('exception',ex_results2)
+#         mytimer.deinit()
+# #     finally:
+# #         machine.reset()
  
-def ReadTemHum():
-    mydht.measure()
-    tem=mydht.temperature()
-    hum=mydht.humidity()
-    data=[tem,hum]
-    print(data)
+# def ReadData():
     
-    return data
+#     tem= '数据1'
+#     hum= 'data2'
+#     data=[tem,hum]
+#     print(data)
     
-if __name__=='__main__':
-    try:
-        mydht=dht.DHT11(machine.Pin(4))
-        ConnectWifi(SSID,PASSWORD)
-        client = MQTTClient(CLIENT_ID, SERVER,0,username,password,60)     #create a mqtt client
-        print(client)
-        client.set_callback(sub_cb)                         #set callback
-        client.connect()                                    #connect mqtt
-        client.subscribe(subscribe_TOPIC)                   #client subscribes to a topic
-        mytimer=Timer(0)
-        mytimer.init(mode=Timer.PERIODIC, period=5000,callback=apptimerevent)
-        while True:
-            client.wait_msg()                            #wait message
+#     return data
+    
+# if __name__=='__main__':
+#     try:
+        
+#         ConnectWifi(SSID,PASSWORD)
+#         client = MQTTClient(CLIENT_ID, SERVER,0,username,password,60)     #create a mqtt client
+#         print(client)
+#         client.set_callback(sub_cb)                         #set callback
+#         client.connect()                                    #connect mqtt
+#         client.subscribe(subscribe_TOPIC)                   #client subscribes to a topic
+#         mytimer=Timer(0)
+#         mytimer.init(mode=Timer.PERIODIC, period=5000,callback=apptimerevent)
+#         while True:
+#             client.wait_msg()                            #wait message
             
-    except Exception  as ex_results:
-        print('exception1',ex_results)
-    finally:
-        if(client is not None):
-            client.disconnect()
-        wlan.disconnect()
-        wlan.active(False)
+#     except Exception  as ex_results:
+#         print('exception1',ex_results)
+#     finally:
+#         if(client is not None):
+#             client.disconnect()
+#         wlan.disconnect()
+#         wlan.active(False)
+
+"""这里是接收信息的"""
+# import LinkNet
+# from umqtt.simple import MQTTClient
+# from machine import Pin,Timer
+# import json
+
+
+
+
+# TOPIC = '/sys/a1WjLnyZ7pi/led_00/thing/service/property/set'
+# clientId = '123456'
+# ProductKey = 'a1WjLnyZ7pi'
+# DeviceName = "led_00"
+# DeviceSecret = "wQg7AsfssdMZwsK5JMP8b3D2JM8curRg"
+# CLIENT_ID = clientId+"|securemode=3,signmethod=hmacsha1,timestamp=789|"
+# user_name = DeviceName+"&"+ProductKey
+# user_password = '7836ea60e600589478251396c3117ab10305080a'
+# SERVER = ProductKey + ".iot-as-mqtt.cn-shanghai.aliyuncs.com"
+# PORT = 1883
+# # 都是从阿里云IoT中获得的配置信息
+# led = Pin(2, Pin.OUT, value=1)
+# client = MQTTClient(client_id=CLIENT_ID, server=SERVER, port=PORT, user=user_name, password=user_password, keepalive=60)
+
+
+
+# def MQTT_Send(tim):
+#     #发布信息
+#     send_mseg = {"params":
+#                         {"alive": 1 },
+#                 "method": "thing.event.property.post"}
+
+#     client.publish(topic="/sys/a1WjLnyZ7pi/led_00/thing/event/property/post",
+#                     msg=str(send_mseg),qos=1, retain=False)
+
+# def sub_cb(topic, msg):
+#     global state
+#     msg = json.loads(msg)
+#     print((topic, msg))
+#     if msg['params']['LightSwitch'] == 0:
+#         led.value(0)
+#         state = 1
+#     elif msg['params']['LightSwitch'] == 1:
+#         led.value(1)
+#         state = 0
+
+# def heartbeat():
+#     tim = Timer(-1)
+#     tim.init(period=60000, mode=Timer.PERIODIC,callback=MQTT_Send)  
+
+# def main():
+#     LinkNet.linkNet()
+#     client.set_callback(sub_cb)
+#     client.connect()
+#     client.subscribe(TOPIC)
+#     print("Connected to %s, subscribed to %s topic" % (SERVER, TOPIC))
+#     heartbeat()
+#     try:
+#         while True:
+#             client.wait_msg()
+#     finally:
+#         client.disconnect()
+
+
+
 
 
 
@@ -224,6 +292,8 @@ def main_loop():
             main_control()
             # main_display0()
             time.sleep(0.1)
+
+
     except:
         print("main_loop end")
         servo1.deinit()
