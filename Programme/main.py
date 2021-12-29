@@ -23,66 +23,85 @@ import machine
 import time
 #import ssd1306
 
-# import network
-# from umqtt import simple as mqtt    #rom umqtt.simple import MQTTClient
-# import _thread
-# import ujson
+from simple import MQTTClient
+import network
+from machine import Pin,Timer
+
 print("import ok")
 
+SSID="********"
+PASSWORD="*******"
+ 
+SERVER ='106.15.83.29'#这里使用域名一直连接不上，只能转换为IP使用了
+#PORT：端口号，库里面默认使用处理
+CLIENT_ID = "7788|securemode=3,signmethod=hmacsha1|"   #设备ID
+username='ESP32-Device1&a1R00eqY67d'
+password='0A1457C700FBEFE108B3E5E5523777BA82321363'
+ 
+publish_TOPIC = '/sys/a1R00eqY67d/ESP32-Device1/thing/event/property/post'
+subscribe_TOPIC ='/sys/a1R00eqY67d/ESP32-Device1/thing/event/property/post_reply'
+ 
+client=None
+mydht=None
+def sub_cb(topic, msg):
+    print((topic, msg))
+ 
+def ConnectWifi(ssid,passwd):
+    global wlan
+    wlan=network.WLAN(network.STA_IF)         #create a wlan object
+    wlan.active(True)                         #Activate the network interface
+    wlan.disconnect()                         #Disconnect the last connected WiFi
+    wlan.connect(ssid,passwd)                 #connect wifi
+    while(wlan.ifconfig()[0]=='0.0.0.0'):
+        time.sleep(1)
+    print(wlan.ifconfig())
+ 
+def apptimerevent(mytimer):
+    try:
+        sensordata=ReadTemHum()
+        mymessage='{"params": {"CurrentTemperature": %d ,"CurrentHumidity": %d }, "method": "thing.event.property.post"}'%(sensordata[0],sensordata[1])
+        client.publish(topic=publish_TOPIC,msg= mymessage, retain=False, qos=0)
+    except Exception as ex_results2:
+        print('exception',ex_results2)
+        mytimer.deinit()
+#     finally:
+#         machine.reset()
+ 
+def ReadTemHum():
+    mydht.measure()
+    tem=mydht.temperature()
+    hum=mydht.humidity()
+    data=[tem,hum]
+    print(data)
+    
+    return data
+    
+if __name__=='__main__':
+    try:
+        mydht=dht.DHT11(machine.Pin(4))
+        ConnectWifi(SSID,PASSWORD)
+        client = MQTTClient(CLIENT_ID, SERVER,0,username,password,60)     #create a mqtt client
+        print(client)
+        client.set_callback(sub_cb)                         #set callback
+        client.connect()                                    #connect mqtt
+        client.subscribe(subscribe_TOPIC)                   #client subscribes to a topic
+        mytimer=Timer(0)
+        mytimer.init(mode=Timer.PERIODIC, period=5000,callback=apptimerevent)
+        while True:
+            client.wait_msg()                            #wait message
+            
+    except Exception  as ex_results:
+        print('exception1',ex_results)
+    finally:
+        if(client is not None):
+            client.disconnect()
+        wlan.disconnect()
+        wlan.active(False)
 
-#import simple as mqtt
-#import network
-#import socket
-import _thread
-#import ujson
-
-# # ###阿里云IOT平台接入
-
-# ALINK_PROP_SET_METHOD='thing.service.property.set'  #阿里云的东西
-# # client = mqtt.Client()
-
-# def thread_publish():  #这个线程发布数据
-#     while True:
-#         time.sleep(2)
-#         send_power = {"method":ALINK_PROP_SET_METHOD,"params":{"Voltage":read_voltage_sun(),"Current":read_current_sun(),"Voltage_stable":read_voltage_stable(),"Current_stable":read_current_stable()}}
-#         send_servo = {"method":ALINK_PROP_SET_METHOD,"params":{"Servo_angle1":angle1,"Servo_angle2":angle2}}
-#         client.publish(topic=" ",msg=str(send_power),qos=1,retain=False)
-#         client.publish(topic=" ",msg=str(send_servo),qos=1,retain=False)
-
-# def receivemessage():
-#     while True:
-#         client.wait_msg()
-
-# def receive_message(topic,msg):
-#     global angle1,angle2
-#     print(topic,msg)
-#     parsed_msg = ujson.loads(msg)
-#     string = parsed_msg['params']
-#     print(string)
-#     print(string.get('Servo_angle1'))
-#     print(string.get('Servo_angle2'))
-#     angle1 = string.get('Servo_angle1')
-#     angle2 = string.get('Servo_angle2')
-#     print(angle1,angle2)
-#     servo_move_to(angle1,servo1)
-#     servo_move_to(angle2,servo2)
 
 
-# wlan=network.WLAN(network.STA_IF)  
-# wlan.active(True)
-# wlan.connect('HUAWEI Mate 40 Pro+','20020926')#连接WIFI
-# ProductKey='gowkbf7kwnu'
-# DeviceName='FNCSAGXVbwdR6kuQ'
-# DeviceSecret='信导期末项目'
-# CLIENT_ID='esp32'
-# user_name='wzqvip'#用户名
-# user_password='20020926Wang'#用户密码
-# SERVER= "https://iot.console.aliyun.com/product/productDetail/gowkbf7kwnu"#阿里云物联网平台地址
-# PORT=1883
-# client = mqtt.MQTTClient(client_id=CLIENT_ID, server=SERVER, port=PORT, user=user_name, password=user_password, keepalive=60)
-# client.connect()
-# client.set_callback(receivemessage)#设置回调函数
-# client.subscribe(" ")#订阅主题
+
+
 
 
 #四个光敏电阻的电压
@@ -117,7 +136,7 @@ servo1=machine.PWM(machine.Pin(15),50)
 servo2=machine.PWM(machine.Pin(2),50)
 print("servo init ok")
 def angle_to_pwm(angle):
-    return int(angle*10/180+1500)
+    return int(angle/3.6+26)
 
 def servo_move_to(angle,servo):
     servo.duty(angle_to_pwm(angle))
@@ -199,12 +218,19 @@ def main_control():
 #     line4 = str("V2"+str(read_voltage_stable())+"V"+" I2"+str(read_current_stable())+"A")
 #     display_oled(line1,line2,line3,line4)
 
-
 def main_loop():
-    while True:
-        main_control()
-        #main_display0()
-        time.sleep(0.1)
+    try:
+        while True:
+            main_control()
+            # main_display0()
+            time.sleep(0.1)
+    except:
+        print("main_loop end")
+        servo1.deinit()
+        servo2.deinit()
+
+
+
 
 # _thread.start_new_thread(main_loop,())
 # _thread.start_new_thread(client.check_msg,())
