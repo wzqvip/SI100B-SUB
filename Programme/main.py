@@ -167,16 +167,19 @@ import time
 
 
 
-
+# light0 = machine.ADC(machine.Pin(13))  #上面的光敏电阻
+# light1 = machine.ADC(machine.Pin(12))  #下面的光敏电阻
+# light2 = machine.ADC(machine.Pin(14))  #右边的光敏电阻
+# light3 = machine.ADC(machine.Pin(27))  #左边的光敏电阻
 
 
 
 
 #四个光敏电阻的电压
-light_sensor1=machine.ADC(machine.Pin(13))
-light_sensor2=machine.ADC(machine.Pin(12))
-light_sensor3=machine.ADC(machine.Pin(14))
-light_sensor4=machine.ADC(machine.Pin(27))
+light_sensor1=machine.ADC(machine.Pin(13)) #上
+light_sensor2=machine.ADC(machine.Pin(12)) #下
+light_sensor3=machine.ADC(machine.Pin(14)) #右
+light_sensor4=machine.ADC(machine.Pin(27)) #左
 
 sensor1_voltage= light_sensor1.read()
 sensor2_voltage= light_sensor2.read()
@@ -291,7 +294,7 @@ def main_loop():
         while True:
             main_control()
             # main_display0()
-            time.sleep(0.1)
+            time.sleep(1)
 
 
     except:

@@ -20,9 +20,10 @@ def angle_transefer(angle):
 servo1 = PWM(Pin(15),50)
 #servo2 = PWM(Pin(2),50)
 
-light0 = ADC(Pin(13))
-light1 = ADC(Pin(12))
-
+light0 = machine.ADC(machine.Pin(13))  #上面的光敏电阻
+light1 = machine.ADC(machine.Pin(12))  #下面的光敏电阻
+light2 = machine.ADC(machine.Pin(14))  #右边的光敏电阻
+light3 = machine.ADC(machine.Pin(27))  #左边的光敏电阻
 
 def read():
     diff = light0.read()-light1.read()
